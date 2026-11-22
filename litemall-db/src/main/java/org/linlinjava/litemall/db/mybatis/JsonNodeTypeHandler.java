@@ -59,7 +59,7 @@ public class JsonNodeTypeHandler extends BaseTypeHandler<com.fasterxml.jackson.d
             JsonNode jsonNode = mapper.readTree(jsonSource);
             return jsonNode;
         } catch (IOException e) {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
         }
         return null;
 
