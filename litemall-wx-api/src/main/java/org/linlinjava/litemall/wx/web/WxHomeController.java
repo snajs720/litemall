@@ -144,7 +144,7 @@ public class WxHomeController {
             HomeCacheManager.loadData(HomeCacheManager.INDEX, entity);
         }
         catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
 //        finally {
 //            executorService.shutdown();

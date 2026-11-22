@@ -58,7 +58,7 @@ public class WxMsgController {
         try {
             wxMaMessage = WxMaMessage.fromXml(request.getInputStream());
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
         if (wxMaMessage != null) {
             String msgType = wxMaMessage.getMsgType();
