@@ -1,5 +1,6 @@
 package org.linlinjava.litemall.db.service;
 
+import org.linlinjava.litemall.db.util.OrderByUtil;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.linlinjava.litemall.db.dao.LitemallOrderMapper;
@@ -23,6 +24,24 @@ public class LitemallOrderService {
     private LitemallOrderMapper litemallOrderMapper;
     @Resource
     private OrderMapper orderMapper;
+
+    /**
+     * 订单列表允许用于排序的 o 表列名白名单；列名外的输入不得进入 order by 子句。
+     */
+    private static final Set<String> ORDER_SORT_COLUMNS = new HashSet<>(Arrays.asList(
+            "id", "add_time", "order_sn", "order_status", "actual_price", "pay_time",
+            "order_price", "freight_price", "integral_price", "comments", "ship_channel", "ship_sn"));
+
+    /**
+     * 转义拼接进 SQL 字符串字面量的单引号，阻断基于引号闭合的注入。
+     * 仅用于本类走 ${query} 通道的字符串条件；新代码应优先使用 #{} 参数绑定。
+     */
+    private static String escapeSql(String value) {
+        if (value == null) {
+            return null;
+        }
+        return value.replace("'", "''");
+    }
 
     public int add(LitemallOrder order) {
         order.setAddTime(LocalDateTime.now());
@@ -84,7 +103,8 @@ public class LitemallOrderService {
         }
         criteria.andDeletedEqualTo(false);
         if (!StringUtils.isEmpty(sort) && !StringUtils.isEmpty(order)) {
-            example.setOrderByClause(sort + " " + order);
+            String orderByClause = OrderByUtil.build(sort, order);
+            if (orderByClause != null) example.setOrderByClause(orderByClause);
         }
 
         PageHelper.startPage(page, limit);
@@ -113,7 +133,8 @@ public class LitemallOrderService {
         criteria.andDeletedEqualTo(false);
 
         if (!StringUtils.isEmpty(sort) && !StringUtils.isEmpty(order)) {
-            example.setOrderByClause(sort + " " + order);
+            String orderByClause = OrderByUtil.build(sort, order);
+            if (orderByClause != null) example.setOrderByClause(orderByClause);
         }
 
         PageHelper.startPage(page, limit);
@@ -213,13 +234,13 @@ public class LitemallOrderService {
     public Map<String, Object> queryVoSelective(String nickname, String consignee, String orderSn, LocalDateTime start, LocalDateTime end, List<Short> orderStatusArray, Integer page, Integer limit, String sort, String order) {
         List<String> querys = new ArrayList<>(4);
         if (!StringUtils.isEmpty(nickname)) {
-            querys.add(" u.nickname like '%" + nickname + "%' ");
+            querys.add(" u.nickname like '%" + escapeSql(nickname) + "%' ");
         }
         if (!StringUtils.isEmpty(consignee)) {
-            querys.add(" o.consignee like '%" + consignee + "%' ");
+            querys.add(" o.consignee like '%" + escapeSql(consignee) + "%' ");
         }
         if (!StringUtils.isEmpty(orderSn)) {
-            querys.add(" o.order_sn = '" + orderSn + "' ");
+            querys.add(" o.order_sn = '" + escapeSql(orderSn) + "' ");
         }
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         if (start != null) {
@@ -235,7 +256,13 @@ public class LitemallOrderService {
         String query = StringUtils.collectionToDelimitedString(querys, "and");
         String orderByClause = null;
         if (!StringUtils.isEmpty(sort) && !StringUtils.isEmpty(order)) {
-            orderByClause = "o." + sort + " " + order +", o.id desc ";
+            String direction = "asc".equalsIgnoreCase(order) ? "asc" : "desc";
+            if (ORDER_SORT_COLUMNS.contains(sort)) {
+                orderByClause = "o." + sort + " " + direction + ", o.id desc ";
+            } else {
+                // 列名不在白名单时回退默认排序，避免任意列名注入 order by 子句
+                orderByClause = "o.id desc ";
+            }
         }
 
         PageHelper.startPage(page, limit);
