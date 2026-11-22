@@ -15,8 +15,9 @@ import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
 public class JwtHelper {
-	// 秘钥
-	static final String SECRET = "X-Litemall-Token";
+	// 开发环境回退默认值。生产环境必须通过环境变量 LITEMALL_JWT_SECRET 或
+	// 系统属性 litemall.jwt.secret 注入足够长度的随机密钥，不要沿用此默认值。
+	private static final String DEFAULT_SECRET = "X-Litemall-Token";
 	// 签名是有谁生成
 	static final String ISSUSER = "LITEMALL";
 	// 签名的主题
@@ -25,9 +26,21 @@ public class JwtHelper {
 	static final String AUDIENCE = "MINIAPP";
 	
 	
+	private static String resolveSecret() {
+		String env = System.getenv("LITEMALL_JWT_SECRET");
+		if (env != null && !env.trim().isEmpty()) {
+			return env.trim();
+		}
+		String prop = System.getProperty("litemall.jwt.secret");
+		if (prop != null && !prop.trim().isEmpty()) {
+			return prop.trim();
+		}
+		return DEFAULT_SECRET;
+	}
+
 	public String createToken(Integer userId){
 		try {
-		    Algorithm algorithm = Algorithm.HMAC256(SECRET);
+		    Algorithm algorithm = Algorithm.HMAC256(resolveSecret());
 		    Map<String, Object> map = new HashMap<String, Object>();
 		    Date nowDate = new Date();
 		    // 过期时间：2小时
@@ -57,7 +70,7 @@ public class JwtHelper {
 	
 	public Integer verifyTokenAndGetUserId(String token) {
 		try {
-		    Algorithm algorithm = Algorithm.HMAC256(SECRET);
+		    Algorithm algorithm = Algorithm.HMAC256(resolveSecret());
 		    JWTVerifier verifier = JWT.require(algorithm)
 		        .withIssuer(ISSUSER)
 		        .build();
