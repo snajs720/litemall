@@ -3,6 +3,8 @@ package org.linlinjava.litemall.db.mybatis;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 
@@ -16,6 +18,7 @@ import java.sql.SQLException;
    <columnOverride column="json_string" javaType="com.fasterxml.jackson.databind.JsonNode" typeHandler="JsonNodeTypeHandler"/>
  */
 public class JsonNodeTypeHandler extends BaseTypeHandler<com.fasterxml.jackson.databind.JsonNode> {
+    private static final Log logger = LogFactory.getLog(JsonNodeTypeHandler.class);
     private static final ObjectMapper mapper = new ObjectMapper();
 
 
@@ -25,7 +28,7 @@ public class JsonNodeTypeHandler extends BaseTypeHandler<com.fasterxml.jackson.d
         try {
             str = mapper.writeValueAsString(parameter);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
             str = "{}";
         }
         ps.setString(i, str);
@@ -41,7 +44,7 @@ public class JsonNodeTypeHandler extends BaseTypeHandler<com.fasterxml.jackson.d
             JsonNode jsonNode = mapper.readTree(jsonSource);
             return jsonNode;
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
         return null;
     }
@@ -56,7 +59,7 @@ public class JsonNodeTypeHandler extends BaseTypeHandler<com.fasterxml.jackson.d
             JsonNode jsonNode = mapper.readTree(jsonSource);
             return jsonNode;
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
         return null;
 
@@ -72,7 +75,7 @@ public class JsonNodeTypeHandler extends BaseTypeHandler<com.fasterxml.jackson.d
             JsonNode jsonNode = mapper.readTree(jsonSource);
             return jsonNode;
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
         return null;
     }

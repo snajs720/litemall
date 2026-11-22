@@ -1,11 +1,16 @@
 package org.linlinjava.litemall.db.util;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class DbUtil {
+
+    private static final Log logger = LogFactory.getLog(DbUtil.class);
 
     public static void backup(File file, String user, String password, String db) {
         try {
@@ -24,7 +29,7 @@ public class DbUtil {
             bufferedReader.close();
             outputStreamWriter.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
     }
 
@@ -45,7 +50,7 @@ public class DbUtil {
             bufferedReader.close();
             outputStreamWriter.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
     }
 }

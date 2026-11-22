@@ -1,6 +1,8 @@
 package org.linlinjava.litemall.db.mybatis;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 
@@ -13,6 +15,7 @@ import java.sql.SQLException;
    <columnOverride column="ids" javaType="java.lang.Integer[]" typeHandler="JsonIntegerArrayTypeHandler"/>
  */
 public class JsonIntegerArrayTypeHandler extends BaseTypeHandler<Integer[]> {
+    private static final Log logger = LogFactory.getLog(JsonIntegerArrayTypeHandler.class);
     private static final ObjectMapper mapper = new ObjectMapper();
 
     @Override
@@ -39,7 +42,7 @@ public class JsonIntegerArrayTypeHandler extends BaseTypeHandler<Integer[]> {
         try {
             return mapper.writeValueAsString(params);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
         return "[]";
     }
