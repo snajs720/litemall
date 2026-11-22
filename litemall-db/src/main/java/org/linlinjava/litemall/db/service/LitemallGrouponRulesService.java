@@ -1,5 +1,6 @@
 package org.linlinjava.litemall.db.service;
 
+import org.linlinjava.litemall.db.util.OrderByUtil;
 import com.alibaba.druid.util.StringUtils;
 import com.github.pagehelper.PageHelper;
 import org.linlinjava.litemall.db.dao.LitemallGoodsMapper;
@@ -79,7 +80,8 @@ public class LitemallGrouponRulesService {
     public List<LitemallGrouponRules> queryList(Integer page, Integer limit, String sort, String order) {
         LitemallGrouponRulesExample example = new LitemallGrouponRulesExample();
         example.or().andStatusEqualTo(GrouponConstant.RULE_STATUS_ON).andDeletedEqualTo(false);
-        example.setOrderByClause(sort + " " + order);
+        String orderByClause = OrderByUtil.build(sort, order);
+        if (orderByClause != null) example.setOrderByClause(orderByClause);
         PageHelper.startPage(page, limit);
         return mapper.selectByExample(example);
     }
@@ -105,7 +107,8 @@ public class LitemallGrouponRulesService {
      */
     public List<LitemallGrouponRules> querySelective(String goodsId, Integer page, Integer size, String sort, String order) {
         LitemallGrouponRulesExample example = new LitemallGrouponRulesExample();
-        example.setOrderByClause(sort + " " + order);
+        String orderByClause = OrderByUtil.build(sort, order);
+        if (orderByClause != null) example.setOrderByClause(orderByClause);
 
         LitemallGrouponRulesExample.Criteria criteria = example.createCriteria();
 
