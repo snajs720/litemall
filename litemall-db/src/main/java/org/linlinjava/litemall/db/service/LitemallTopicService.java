@@ -1,5 +1,6 @@
 package org.linlinjava.litemall.db.service;
 
+import org.linlinjava.litemall.db.util.OrderByUtil;
 import com.github.pagehelper.PageHelper;
 import org.linlinjava.litemall.db.dao.LitemallTopicMapper;
 import org.linlinjava.litemall.db.domain.LitemallGroupon;
@@ -26,7 +27,8 @@ public class LitemallTopicService {
     public List<LitemallTopic> queryList(int offset, int limit, String sort, String order) {
         LitemallTopicExample example = new LitemallTopicExample();
         example.or().andDeletedEqualTo(false);
-        example.setOrderByClause(sort + " " + order);
+        String orderByClause = OrderByUtil.build(sort, order);
+        if (orderByClause != null) example.setOrderByClause(orderByClause);
         PageHelper.startPage(offset, limit);
         return topicMapper.selectByExampleSelective(example, columns);
     }
@@ -76,7 +78,8 @@ public class LitemallTopicService {
         criteria.andDeletedEqualTo(false);
 
         if (!StringUtils.isEmpty(sort) && !StringUtils.isEmpty(order)) {
-            example.setOrderByClause(sort + " " + order);
+            String orderByClause = OrderByUtil.build(sort, order);
+            if (orderByClause != null) example.setOrderByClause(orderByClause);
         }
 
         PageHelper.startPage(page, limit);
