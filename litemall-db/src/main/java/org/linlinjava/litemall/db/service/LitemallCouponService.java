@@ -1,5 +1,6 @@
 package org.linlinjava.litemall.db.service;
 
+import org.linlinjava.litemall.db.util.OrderByUtil;
 import com.alibaba.druid.util.StringUtils;
 import com.github.pagehelper.PageHelper;
 import org.linlinjava.litemall.db.dao.LitemallCouponMapper;
@@ -51,7 +52,8 @@ public class LitemallCouponService {
      */
     public List<LitemallCoupon> queryList(LitemallCouponExample.Criteria criteria, int offset, int limit, String sort, String order) {
         criteria.andTypeEqualTo(CouponConstant.TYPE_COMMON).andStatusEqualTo(CouponConstant.STATUS_NORMAL).andDeletedEqualTo(false);
-        criteria.example().setOrderByClause(sort + " " + order);
+        String orderByClause = OrderByUtil.build(sort, order);
+        if (orderByClause != null) criteria.example().setOrderByClause(orderByClause);
         PageHelper.startPage(offset, limit);
         return couponMapper.selectByExampleSelective(criteria.example(), result);
     }
@@ -120,7 +122,8 @@ public class LitemallCouponService {
         criteria.andDeletedEqualTo(false);
 
         if (!StringUtils.isEmpty(sort) && !StringUtils.isEmpty(order)) {
-            example.setOrderByClause(sort + " " + order);
+            String orderByClause = OrderByUtil.build(sort, order);
+            if (orderByClause != null) example.setOrderByClause(orderByClause);
         }
 
         PageHelper.startPage(page, limit);
