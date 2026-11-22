@@ -1,5 +1,7 @@
 package org.linlinjava.litemall.core.task;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.util.concurrent.DelayQueue;
@@ -7,6 +9,7 @@ import java.util.concurrent.Executors;
 
 @Component
 public class TaskService {
+    private final Log logger = LogFactory.getLog(TaskService.class);
     private TaskService taskService;
     private DelayQueue<Task> delayQueue =  new DelayQueue<Task>();
 
@@ -22,7 +25,7 @@ public class TaskService {
                         Task task = delayQueue.take();
                         task.run();
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        logger.error(e.getMessage(), e);
                     }
                 }
             }

@@ -120,9 +120,9 @@ public class AliyunSmsSender implements SmsSender {
 
             return smsResult;
         } catch (ServerException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         } catch (ClientException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
 
         SmsResult smsResult = new SmsResult();
