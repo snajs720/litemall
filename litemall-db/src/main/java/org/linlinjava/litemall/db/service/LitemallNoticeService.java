@@ -1,5 +1,6 @@
 package org.linlinjava.litemall.db.service;
 
+import org.linlinjava.litemall.db.util.OrderByUtil;
 import com.github.pagehelper.PageHelper;
 import org.linlinjava.litemall.db.dao.LitemallNoticeMapper;
 import org.linlinjava.litemall.db.domain.LitemallNotice;
@@ -32,7 +33,8 @@ public class LitemallNoticeService {
         criteria.andDeletedEqualTo(false);
 
         if (!StringUtils.isEmpty(sort) && !StringUtils.isEmpty(order)) {
-            example.setOrderByClause(sort + " " + order);
+            String orderByClause = OrderByUtil.build(sort, order);
+            if (orderByClause != null) example.setOrderByClause(orderByClause);
         }
 
         PageHelper.startPage(page, limit);
